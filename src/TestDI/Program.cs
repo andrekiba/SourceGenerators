@@ -1,15 +1,18 @@
 ﻿using System;
+using System.IO;
+using System.Threading.Tasks;
 using GeneratorRunner;
-using Generators.HelloWorld;
+using Generators.DI;
 
-namespace TestHelloWorld
+namespace TestDI
 {
     internal static class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            var generator = new HelloWorldGenerator();
-            var (diagnostics, output) = Runner.GetGeneratedOutput(generator, string.Empty);
+            var source = await File.ReadAllTextAsync(@"../../../../ConsoleApp/Program.cs");
+            var generator = new DIGenerator();
+            var (diagnostics, output) = Runner.GetGeneratedOutput(generator, source);
 
             if (diagnostics.Length > 0)
             {

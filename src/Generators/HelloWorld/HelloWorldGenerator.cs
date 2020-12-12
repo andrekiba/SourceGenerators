@@ -19,7 +19,7 @@ namespace Generators.HelloWorld
 using System;
 namespace HelloWorldGenerated
 {
-    public static class TestHelloWorld
+    public static class HelloWorld
     {
         public static void SayHello() 
         {

@@ -8,8 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\GeneratorRunner\GeneratorRunner.csproj" />
-      <ProjectReference Include="..\Generators\Generators.csproj" />
+        <ProjectReference Include="..\GeneratorRunner\GeneratorRunner.csproj" />
+        <ProjectReference Include="..\Generators\Generators.csproj" />
     </ItemGroup>
 
 </Project>

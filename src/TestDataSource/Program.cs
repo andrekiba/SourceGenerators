@@ -1,22 +1,26 @@
 ﻿using System;
+using System.IO;
+using System.Threading.Tasks;
 using GeneratorRunner;
-using Generators.HelloWorld;
+using Generators.DataSource;
 
-namespace TestHelloWorld
+namespace TestDataSource
 {
     internal static class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            var generator = new HelloWorldGenerator();
-            var (diagnostics, output) = Runner.GetGeneratedOutput(generator, string.Empty);
+            var source = await File.ReadAllTextAsync(@"../../../../ConsoleApp/Program.cs");
+            var generator = new DataSourceGenerator();
+            var (diagnostics, output) = Runner.GetGeneratedOutput(generator, source);
 
             if (diagnostics.Length > 0)
             {
                 Console.WriteLine("Diagnostics:");
                 foreach (var diag in diagnostics)
+                {
                     Console.WriteLine("   " + diag);
-                
+                }
                 Console.WriteLine();
                 Console.WriteLine("Output:");
             }

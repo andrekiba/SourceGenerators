@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis.Text;
 namespace Generators.DI
 {
     [Generator]
-    public class DISourceGenerator : ISourceGenerator
+    public class DIGenerator : ISourceGenerator
     {
         const bool SimplifyFieldNames = true;
         const bool UseLazyWhenMultipleServices = true;
@@ -271,7 +271,7 @@ namespace DI
 
                 if (realType == null)
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(new DiagnosticDescriptor("DIGEN001", "Type not found", $"Could not find an implementation of '{typeToCreate}'.", "DI.ServiceLocator", DiagnosticSeverity.Error, true), Location.None));
+                    context.ReportDiagnostic(Diagnostic.Create(new DiagnosticDescriptor("DIGEN001", "ModelType not found", $"Could not find an implementation of '{typeToCreate}'.", "DI.ServiceLocator", DiagnosticSeverity.Error, true), Location.None));
                     return;
                 }
 
@@ -339,17 +339,18 @@ namespace DI
 
         class Service
         {
-            public Service(INamedTypeSymbol typeToCreate)
-            {
-                Type = typeToCreate;
-            }
-
             public INamedTypeSymbol Type { get; }
             public INamedTypeSymbol ImplementationType { get; internal set; } = null!;
             public List<Service> ConstructorArguments { get; } = new ();
             public bool IsTransient { get; internal set; }
             public bool UseCollectionInitializer { get; internal set; }
             public string? VariableName { get; internal set; }
+            
+            public Service(INamedTypeSymbol typeToCreate)
+            {
+                Type = typeToCreate;
+            }
+            
         }
     }
 }
