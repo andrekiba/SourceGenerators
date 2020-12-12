@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Generators.DataSourceGenerator;
+using Generators.DI;
 using Generators.HelloWorld;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,6 +15,8 @@ namespace TestHelloWorld
         static void Main(string[] args)
         {
             //HelloWorldGenerated.TestHelloWorld.SayHello();
+            
+            //var foo = DI.ServiceLocator.GetService<IFoo>();
             
             const string source = @"
 namespace Foo
@@ -76,8 +79,9 @@ namespace Foo
             //     return (diagnostics, "");
             // }
 
-            var generator = new DataSourceGenerator();
-
+            //var generator = new DataSourceGenerator();
+            var generator = new DISourceGenerator();
+            
             var driver = CSharpGeneratorDriver.Create(generator);
             driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var generateDiagnostics);
 
@@ -89,5 +93,14 @@ namespace Foo
 
             return (generateDiagnostics, output.ToString());
         }
+    }
+    
+    //[DI.Transient]
+    interface IFoo
+    {
+    }
+
+    class Foo : IFoo
+    {
     }
 }
