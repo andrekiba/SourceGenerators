@@ -1,12 +1,45 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using Generators.DataSource;
+using Generators.DI;
+using Generators.EnumValidator;
+using Generators.HelloWorld;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace GeneratorRunner
+namespace GeneratorTest
 {
+    internal static class Program
+    {
+        static async Task Main(string[] args)
+        {
+            var source = await File.ReadAllTextAsync(@"../../../../ConsoleApp/Program.cs");
+
+            //var generator = new HelloWorldGenerator();
+            //var generator = new DIGenerator();
+            //var generator = new EnumValidatorGenerator();
+            var generator = new DataSourceGenerator();
+            
+            var (diagnostics, output) = Runner.GetGeneratedOutput(generator, source);
+
+            if (diagnostics.Length > 0)
+            {
+                Console.WriteLine("Diagnostics:");
+                foreach (var diag in diagnostics)
+                    Console.WriteLine("   " + diag);
+                
+                Console.WriteLine();
+                Console.WriteLine("Output:");
+            }
+
+            Console.WriteLine(output);
+        }
+    }
+    
     public static class Runner
     {
         public static (ImmutableArray<Diagnostic>, string) GetGeneratedOutput(ISourceGenerator generator, string source)

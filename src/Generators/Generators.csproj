@@ -14,8 +14,4 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.8.0" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="EnumValidator" />
-    </ItemGroup>
-
 </Project>

@@ -1,34 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using DataSource;
+﻿using DataSource;
 
 namespace ConsoleApp
 {
-    #region HelloWorld
-    
-    /*
     internal static class Program
     {
         static void Main(string[] args)
         {
-            HelloWorldGenerated.HelloWorld.SayHello();
+            //HelloWorld
+            //HelloWorldGenerated.HelloWorld.SayHello();
+            
+            //DI
+            //var foo = DI.ServiceLocator.GetService<IFoo>();
+            
+            //Enum
+            TestSimple(Simple.First);
+            TestComplex(Complex.Fifth);
+            TestComplex((Complex) 6);
+            
+            static void TestSimple(Simple simple)
+            {
+                EnumValidation.EnumValidator.Validate(simple);
+            }
+            
+            static void TestComplex(Complex complex)
+            {
+                EnumValidation.EnumValidator.Validate(complex);
+            }
+            
+            //DataSource
+            //var test = new Test();
+            //var mTest = ModelService.GetMetadata<Test>();
         }
     }
-    */
-    
-    #endregion
     
     #region DI
-    
-    /*
-    internal static class Program
-    {
-        static void Main(string[] args)
-        {
-            //var foo = DI.ServiceLocator.GetService<IFoo>();
-            Console.ReadLine();
-        }
-    }
     
     [DI.Transient]
     internal interface IFoo
@@ -38,22 +43,31 @@ namespace ConsoleApp
     internal class Foo : IFoo
     {
     }
-    */
-    
+
     #endregion
     
-    #region DataSource
-    
-    internal static class Program
+    #region Enum
+
+    internal enum Simple
     {
-        static void Main(string[] args)
-        {
-            var test = new Test();
-            
-            var mTest = ModelService.GetMetadata<Test>();
-        }
+        First,
+        Second
+    }
+
+    internal enum Complex
+    {
+        First = 3,
+        Second = 4,
+        //Sixth = 6,
+        Third = 7,
+        Fourth = 8,
+        Fifth = 9
     }
     
+    #endregion 
+    
+    #region DataSource
+
     [DataSource("tests_tb")]
     public class Test
     {
@@ -71,11 +85,17 @@ namespace ConsoleApp
         public string Error { get; set; }
     }
     
-    [DataSource("users_tb")]
+    [DataSource("users_vw", DataSourceType.FileQuery)]
     public class User
     {
+        [Column("mail")]
+        public string Email { get; set; }
+        
         [Column]
-        public string Name { get; set; }
+        public string FirstName { get; set; }
+        
+        [Column]
+        public string LastName { get; set; }
     }
     
     #endregion 

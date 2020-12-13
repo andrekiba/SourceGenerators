@@ -153,14 +153,14 @@ namespace DataSource
             };
 
             var models = propSymbols
-                .GroupBy(p => p.ContainingType)
-                .Select(g => GenerateMMetadata(g.Key, g.ToList(), knownTypes, context))
+                .GroupBy(p => p.ContainingType, SymbolEqualityComparer.Default)
+                .Select(g => GenerateMMetadata((INamedTypeSymbol)g.Key, g.ToList(), knownTypes))
                 .ToList();
 
             GenerateModelService(context, models);
         }
 
-        static MMetadata GenerateMMetadata(INamedTypeSymbol classSymbol, IEnumerable<IPropertySymbol> propSymbols, KnownTypes knownTypes, GeneratorExecutionContext context)
+        static MMetadata GenerateMMetadata(INamedTypeSymbol classSymbol, IEnumerable<IPropertySymbol> propSymbols, KnownTypes knownTypes)
         {
             var dsAttr = classSymbol.GetAttributes()
                 .Single(ad => ad.AttributeClass != null && ad.AttributeClass.Equals(knownTypes.DataSourceAttribute, SymbolEqualityComparer.Default));
@@ -196,11 +196,11 @@ return new ModelMetadata
     DataSource = ""{meta.DataSourceName}"",
     DataSourceType = (DataSourceType){meta.DataSourceType},
     Fields = new List<FieldMetadata>
-    {{", indent);
+    {{", indent, skipFirst:false);
 
             foreach (var f in meta.Fields)
                 sb.Indent(ConstructFieldMetadata(f, f == meta.Fields.Last()), indent+1);
-            
+
             sb.Indent(@"
     }
 };", indent, newLineOnLast:false);
@@ -217,7 +217,7 @@ new FieldMetadata
 {{
     Name = ""{meta.Name}"",
     ColumnName = ""{meta.ColumnName}""
-}}{(last ? string.Empty : ",")}", 1, newLineOnLast:false);
+}}{(last ? string.Empty : ",")}", 1, newLineOnLast:false, skipFirst:false);
 
             return sb.ToString();
         }
@@ -235,7 +235,7 @@ namespace DataSource
     {");
             sb.Indent(@"
         public static ModelMetadata GetMetadata<T>()
-        {");
+        {", newLineOnLast:false);
             
             foreach (var meta in metas)
             {
@@ -243,7 +243,7 @@ namespace DataSource
                 {
                     sb.Indent(@$"
             if (typeof(T) == typeof({meta.ModelType}))
-            {{");
+            {{", newLineOnLast:false, skipFirst:false);
                     
                     sb.Indent(@$"
             {ConstructModelMetadata(meta, 4)}");
@@ -268,7 +268,6 @@ namespace DataSource
         }
     }
 }");
-            var test = sb.ToString();
             
             context.AddSource("ModelService.cs", sb.ToString());
         }
