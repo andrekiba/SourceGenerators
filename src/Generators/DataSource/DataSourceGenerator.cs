@@ -268,7 +268,6 @@ namespace DataSource
         }
     }
 }");
-            
             context.AddSource("ModelService.cs", sb.ToString());
         }
     }
@@ -306,10 +305,12 @@ namespace DataSource
         {
             switch (syntaxNode)
             {
-                case ClassDeclarationSyntax cds when cds.AttributeLists.Any():
+                case ClassDeclarationSyntax cds when cds.AttributeLists.Any(a => 
+                        a.Attributes.Any(x => x.Name.ToString() == "DataSource")):
                     CandidateClasses.Add(cds);
                     break;
-                case PropertyDeclarationSyntax pds when pds.AttributeLists.Any():
+                case PropertyDeclarationSyntax pds when pds.AttributeLists.Any(a => 
+                        a.Attributes.Any(x => x.Name.ToString() == "Column")):
                     CandidateProperties.Add(pds);
                     break;
             }

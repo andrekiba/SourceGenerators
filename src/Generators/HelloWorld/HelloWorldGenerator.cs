@@ -15,7 +15,7 @@ namespace Generators.HelloWorld
         public void Execute(GeneratorExecutionContext context)
         {
             // begin creating the source we'll inject into the users compilation
-            var sourceBuilder = new StringBuilder(@"
+            var sb = new StringBuilder(@"
 using System;
 namespace HelloWorldGenerated
 {
@@ -34,17 +34,17 @@ namespace HelloWorldGenerated
             foreach (var tree in syntaxTrees)
             {
                 if(!string.IsNullOrWhiteSpace(tree.FilePath))
-                    sourceBuilder.AppendLine($@"            Console.WriteLine(@"" - {tree.FilePath}"");");
+                    sb.AppendLine($@"Console.WriteLine(@"" - {tree.FilePath}"");");
             }
 
             // finish creating the source to inject
-            sourceBuilder.Append(@"
+            sb.Append(@"
         }
     }
 }");
 
             // inject the created source into the users compilation
-            context.AddSource("HelloWorldGenerator", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
+            context.AddSource("HelloWorldGenerator", SourceText.From(sb.ToString(), Encoding.UTF8));
         }
     }
 }

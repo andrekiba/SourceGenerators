@@ -7,12 +7,14 @@ namespace ConsoleApp
         static void Main(string[] args)
         {
             //HelloWorld
-            //HelloWorldGenerated.HelloWorld.SayHello();
+            HelloWorldGenerated.HelloWorld.SayHello();
             
             //DI
             //var foo = DI.ServiceLocator.GetService<IFoo>();
-            
+            //var bar = DI.ServiceLocator.GetService<IBar>();
+
             //Enum
+            /*
             TestSimple(Simple.First);
             TestComplex(Complex.Fifth);
             TestComplex((Complex) 6);
@@ -26,7 +28,8 @@ namespace ConsoleApp
             {
                 EnumValidation.EnumValidator.Validate(complex);
             }
-            
+            */
+
             //DataSource
             //var test = new Test();
             //var mTest = ModelService.GetMetadata<Test>();
@@ -41,6 +44,14 @@ namespace ConsoleApp
     }
 
     internal class Foo : IFoo
+    {
+    }
+    
+    internal interface IBar
+    {
+    }
+
+    internal class Bar : IBar
     {
     }
 

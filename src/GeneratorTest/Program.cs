@@ -19,10 +19,10 @@ namespace GeneratorTest
         {
             var source = await File.ReadAllTextAsync(@"../../../../ConsoleApp/Program.cs");
 
-            //var generator = new HelloWorldGenerator();
+            var generator = new HelloWorldGenerator();
             //var generator = new DIGenerator();
             //var generator = new EnumValidatorGenerator();
-            var generator = new DataSourceGenerator();
+            //var generator = new DataSourceGenerator();
             
             var (diagnostics, output) = Runner.GetGeneratedOutput(generator, source);
 
@@ -54,7 +54,7 @@ namespace GeneratorTest
                 .Cast<MetadataReference>()
                 .ToList();
 
-            var compilation = CSharpCompilation.Create("foo", new[] { syntaxTree }, references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            var compilation = CSharpCompilation.Create("comp", new[] { syntaxTree }, references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
             // TODO: Uncomment these lines if you want to return immediately if the injected program isn't valid _before_ running generators
             // ImmutableArray<Diagnostic> compilationDiagnostics = compilation.GetDiagnostics();
