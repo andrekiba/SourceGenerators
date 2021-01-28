@@ -27,5 +27,13 @@ namespace Generators
 		
             return sb;
         }
+
+        public static string ToCamelCaseTrimPoints(this string s)
+        {
+            if(!string.IsNullOrEmpty(s) && s.Length > 1)
+                return char.ToLowerInvariant(s[0]) + s.Substring(1).Replace(".", string.Empty);
+            
+            return s;
+        }
     }
 }

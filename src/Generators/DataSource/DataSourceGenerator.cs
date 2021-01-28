@@ -191,7 +191,7 @@ namespace DataSource
             var sb = new StringBuilder();
             
             sb.Indent($@"
-return new ModelMetadata
+new ModelMetadata
 {{
     DataSource = ""{meta.DataSourceName}"",
     DataSourceType = (DataSourceType){meta.DataSourceType},
@@ -203,7 +203,7 @@ return new ModelMetadata
 
             sb.Indent(@"
     }
-};", indent, newLineOnLast:false);
+}", indent, newLineOnLast:false);
 
             return sb.ToString();
         }
@@ -233,6 +233,17 @@ namespace DataSource
 { 
     public static class ModelService
     {");
+            if (metas.Any())
+            {
+                foreach (var meta in metas)
+                {
+                    meta.VariableName = meta.ModelType.ToString().ToCamelCaseTrimPoints();
+                    sb.Indent(@$"
+static Lazy<ModelMetadata> {meta.VariableName} = new Lazy<ModelMetadata>(() => {ConstructModelMetadata(meta, 1)});
+", 2);
+                }
+            }
+            
             sb.Indent(@"
         public static ModelMetadata GetMetadata<T>()
         {", newLineOnLast:false);
@@ -246,7 +257,7 @@ namespace DataSource
             {{", newLineOnLast:false, skipFirst:false);
                     
                     sb.Indent(@$"
-            {ConstructModelMetadata(meta, 4)}");
+                return {meta.VariableName}.Value;", skipFirst:false);
 
                     sb.Indent(@"
             }");
@@ -254,7 +265,7 @@ namespace DataSource
                 else
                 {
                     sb.Indent(@$"
-            {ConstructModelMetadata(meta, 3)}");
+            return {meta.VariableName}.Value;", skipFirst:false);
                 }
             }
             
@@ -283,10 +294,13 @@ namespace DataSource
     
     internal class MMetadata
     {
-        public INamedTypeSymbol ModelType { get; set; }
-        public string DataSourceName { get; set; }
-        public int DataSourceType { get; set; }
+        public INamedTypeSymbol ModelType { get; internal set; }
+        public string DataSourceName { get; internal set; }
+        public int DataSourceType { get; internal set; }
+        
         public List<FMetadata> Fields = new();
+        
+        public string VariableName { get; internal set; }
     }
 
     internal class FMetadata

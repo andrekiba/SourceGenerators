@@ -33,6 +33,8 @@ namespace ConsoleApp
             //DataSource
             //var test = new Test();
             //var mTest = ModelService.GetMetadata<Test>();
+            //var user = new User();
+            //var mUser = ModelService.GetMetadata<User>();
         }
     }
     
@@ -85,8 +87,8 @@ namespace ConsoleApp
         [Column]
         public string Target { get; set; }
         
-        [Column("targettone")]
-        public string Target1 { get; set; }
+        [Column("runtime")]
+        public string Runtime { get; set; }
     }
     
     [DataSource("logs_tb")]
@@ -108,6 +110,6 @@ namespace ConsoleApp
         [Column]
         public string LastName { get; set; }
     }
-    
+
     #endregion 
 }
