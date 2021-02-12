@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -5,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using Scriban;
 
 namespace Generators.DataSource
 {
@@ -88,6 +90,7 @@ namespace DataSource
     }
 }
 ";
+        
         #endregion 
 
         public void Initialize(GeneratorInitializationContext context)
@@ -120,7 +123,8 @@ namespace DataSource
             var dsTypeSymbol = compilation.GetTypeByMetadataName("DataSource.DataSourceType");
             var fieldMetadataSymbol = compilation.GetTypeByMetadataName("DataSource.FieldMetadata");
             var modelMetadataSymbol = compilation.GetTypeByMetadataName("DataSource.ModelMetadata");
-
+            
+            //we can start from candidate classes...
             var classSymbols = (
                 from clas in receiver.CandidateClasses 
                 let model = compilation.GetSemanticModel(clas.SyntaxTree) 
@@ -132,6 +136,7 @@ namespace DataSource
                 select classSymbol)
                 .ToList();
 
+            //but it is better to start from properties and then just group by the containing class type
             var propSymbols = (
                 from prop in receiver.CandidateProperties 
                 let model = compilation.GetSemanticModel(prop.SyntaxTree) 
@@ -157,7 +162,12 @@ namespace DataSource
                 .Select(g => GenerateMMetadata((INamedTypeSymbol)g.Key, g.ToList(), knownTypes))
                 .ToList();
 
-            GenerateModelService(context, models);
+            var modelServiceModel = new ModelServiceModel
+            {
+                Metas = models
+            };
+            
+            GenerateModelService(context, modelServiceModel);
         }
 
         static MMetadata GenerateMMetadata(INamedTypeSymbol classSymbol, IEnumerable<IPropertySymbol> propSymbols, KnownTypes knownTypes)
@@ -171,6 +181,7 @@ namespace DataSource
             return new MMetadata
             {
                 ModelType = classSymbol,
+                VariableName = classSymbol.ToString().ToCamelCaseTrimPoints(),
                 DataSourceName = dsName,
                 DataSourceType = dsType,
                 Fields = propSymbols.Select(ps =>
@@ -222,8 +233,20 @@ new FieldMetadata
             return sb.ToString();
         }
 
-        static void GenerateModelService(GeneratorExecutionContext context, IReadOnlyCollection<MMetadata> metas)
+        static void GenerateModelService(GeneratorExecutionContext context, ModelServiceModel modelServiceModel)
         {
+            #region Scriban
+            
+            var templateString = ResourceReader.GetResource("ModelService.scriban");
+            var template = Template.Parse(templateString);
+            var output = template.Render(modelServiceModel, member => member.Name);
+            var sourceText = SourceText.From(output, Encoding.UTF8);
+            context.AddSource("ModelService.cs", sourceText);
+            
+            #endregion 
+
+            #region StringBuilder
+            /*
             var sb = new StringBuilder();
 
             sb.Indent(@"
@@ -233,9 +256,9 @@ namespace DataSource
 { 
     public static class ModelService
     {");
-            if (metas.Any())
+            if (modelService.Metas.Any())
             {
-                foreach (var meta in metas)
+                foreach (var meta in modelService.Metas)
                 {
                     meta.VariableName = meta.ModelType.ToString().ToCamelCaseTrimPoints();
                     sb.Indent(@$"
@@ -248,9 +271,9 @@ static Lazy<ModelMetadata> {meta.VariableName} = new Lazy<ModelMetadata>(() => {
         public static ModelMetadata GetMetadata<T>()
         {", newLineOnLast:false);
             
-            foreach (var meta in metas)
+            foreach (var meta in modelService.Metas)
             {
-                if (meta != metas.Last())
+                if (meta != modelService.Metas.Last())
                 {
                     sb.Indent(@$"
             if (typeof(T) == typeof({meta.ModelType}))
@@ -269,7 +292,7 @@ static Lazy<ModelMetadata> {meta.VariableName} = new Lazy<ModelMetadata>(() => {
                 }
             }
             
-            if (metas.Count == 0)
+            if (modelService.Metas.Count == 0)
             {
                 sb.Indent(@"
             throw new System.InvalidOperationException(""This code is unreachable."");");
@@ -280,9 +303,11 @@ static Lazy<ModelMetadata> {meta.VariableName} = new Lazy<ModelMetadata>(() => {
     }
 }");
             context.AddSource("ModelService.cs", sb.ToString());
+            */
+            #endregion 
         }
     }
-    
+
     internal class KnownTypes
     {
         public INamedTypeSymbol FieldMetadata { get; set; }
@@ -290,6 +315,11 @@ static Lazy<ModelMetadata> {meta.VariableName} = new Lazy<ModelMetadata>(() => {
         public INamedTypeSymbol DataSourceType { get; set; }
         public INamedTypeSymbol DataSourceAttribute { get; set; }
         public INamedTypeSymbol ColumnAttribute { get; set; }
+    }
+    
+    internal class ModelServiceModel
+    {
+        public List<MMetadata> Metas = new();
     }
     
     internal class MMetadata

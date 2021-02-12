@@ -19,10 +19,10 @@ namespace GeneratorTest
         {
             var source = await File.ReadAllTextAsync(@"../../../../ConsoleApp/Program.cs");
 
-            var generator = new HelloWorldGenerator();
+            //var generator = new HelloWorldGenerator();
             //var generator = new DIGenerator();
             //var generator = new EnumValidatorGenerator();
-            //var generator = new DataSourceGenerator();
+            var generator = new DataSourceGenerator();
             
             var (diagnostics, output) = Runner.GetGeneratedOutput(generator, source);
 

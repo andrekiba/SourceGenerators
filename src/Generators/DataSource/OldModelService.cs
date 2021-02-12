@@ -8,8 +8,11 @@ namespace Generators.DataSource
     public static class OldModelService
     {
         public static ModelMetadata GetMetdata<T>() => GetMetadata(typeof(T));
-        public static ModelMetadata GetMetadata(Type modelType) //eventually put the ModelMetadata in cache once constructed
+        public static ModelMetadata GetMetadata(Type modelType)
         {
+            //TODO: eventually put the ModelMetadata in cache once constructed
+            //TODO: because we don't want to recreate the model every time we run the same query
+            
             var dsAttr = (DataSourceAttribute)modelType.GetCustomAttribute(typeof(DataSourceAttribute));
             var modelMetadata = new ModelMetadata
             {
