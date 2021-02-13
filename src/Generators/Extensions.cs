@@ -35,5 +35,13 @@ namespace Generators
             
             return s;
         }
+        
+        public static string ToCamelCase(this string s)
+        {
+            if(!string.IsNullOrEmpty(s) && s.Length > 1)
+                return char.ToLowerInvariant(s[0]) + s.Substring(1);
+            
+            return s;
+        }
     }
 }

@@ -148,6 +148,7 @@ namespace DataSource
                 select propSymbol)
                 .ToList();
             
+            //just the list of the known types
             var knownTypes = new KnownTypes
             {
                 DataSourceType = dsTypeSymbol,
@@ -157,6 +158,8 @@ namespace DataSource
                 ModelMetadata = modelMetadataSymbol
             };
 
+            //for each class marked with the DataSource attribute
+            //generate the model metadata object useful to create the ModelService
             var models = propSymbols
                 .GroupBy(p => p.ContainingType, SymbolEqualityComparer.Default)
                 .Select(g => GenerateMMetadata((INamedTypeSymbol)g.Key, g.ToList(), knownTypes))
@@ -172,12 +175,15 @@ namespace DataSource
 
         static MMetadata GenerateMMetadata(INamedTypeSymbol classSymbol, IEnumerable<IPropertySymbol> propSymbols, KnownTypes knownTypes)
         {
+            //find the DataSource attribute
             var dsAttr = classSymbol.GetAttributes()
                 .Single(ad => ad.AttributeClass != null && ad.AttributeClass.Equals(knownTypes.DataSourceAttribute, SymbolEqualityComparer.Default));
 
+            //take his arguments
             var dsName = dsAttr.ConstructorArguments[0].Value?.ToString();
             var dsType = (int?) dsAttr.ConstructorArguments[1].Value ?? 0;
 
+            //construct the model metadata
             return new MMetadata
             {
                 ModelType = classSymbol,
@@ -186,53 +192,20 @@ namespace DataSource
                 DataSourceType = dsType,
                 Fields = propSymbols.Select(ps =>
                 {
+                    //find the column attribute
                     var cAttr = ps.GetAttributes()
                         .Single(ad => ad.AttributeClass != null && ad.AttributeClass.Equals(knownTypes.ColumnAttribute, SymbolEqualityComparer.Default));
+                    
+                    //construct the field metadata
                     return new FMetadata
                     {
                         Name = ps.Name,
-                        ColumnName = cAttr.ConstructorArguments.FirstOrDefault().Value?.ToString() ?? $"{char.ToLower(ps.Name[0])}{ps.Name.Substring(1)}" 
+                        ColumnName = cAttr.ConstructorArguments.FirstOrDefault().Value?.ToString() ?? ps.Name.ToCamelCase() 
                     };
                 }).ToList() 
             };
         }
-
-        static string ConstructModelMetadata(MMetadata meta, int indent)
-        {
-            var sb = new StringBuilder();
-            
-            sb.Indent($@"
-new ModelMetadata
-{{
-    DataSource = ""{meta.DataSourceName}"",
-    DataSourceType = (DataSourceType){meta.DataSourceType},
-    Fields = new List<FieldMetadata>
-    {{", indent, skipFirst:false);
-
-            foreach (var f in meta.Fields)
-                sb.Indent(ConstructFieldMetadata(f, f == meta.Fields.Last()), indent+1);
-
-            sb.Indent(@"
-    }
-}", indent, newLineOnLast:false);
-
-            return sb.ToString();
-        }
         
-        static string ConstructFieldMetadata(FMetadata meta, bool last)
-        {
-            var sb = new StringBuilder();
-            
-            sb.Indent($@"
-new FieldMetadata
-{{
-    Name = ""{meta.Name}"",
-    ColumnName = ""{meta.ColumnName}""
-}}{(last ? string.Empty : ",")}", 1, newLineOnLast:false, skipFirst:false);
-
-            return sb.ToString();
-        }
-
         static void GenerateModelService(GeneratorExecutionContext context, ModelServiceModel modelServiceModel)
         {
             #region Scriban
@@ -306,6 +279,41 @@ static Lazy<ModelMetadata> {meta.VariableName} = new Lazy<ModelMetadata>(() => {
             */
             #endregion 
         }
+        
+        static string ConstructModelMetadata(MMetadata meta, int indent)
+        {
+            var sb = new StringBuilder();
+            
+            sb.Indent($@"
+new ModelMetadata
+{{
+    DataSource = ""{meta.DataSourceName}"",
+    DataSourceType = (DataSourceType){meta.DataSourceType},
+    Fields = new List<FieldMetadata>
+    {{", indent, skipFirst:false);
+
+            foreach (var f in meta.Fields)
+                sb.Indent(ConstructFieldMetadata(f, f == meta.Fields.Last()), indent+1);
+
+            sb.Indent(@"
+    }
+}", indent, newLineOnLast:false);
+
+            return sb.ToString();
+        }
+        static string ConstructFieldMetadata(FMetadata meta, bool last)
+        {
+            var sb = new StringBuilder();
+            
+            sb.Indent($@"
+new FieldMetadata
+{{
+    Name = ""{meta.Name}"",
+    ColumnName = ""{meta.ColumnName}""
+}}{(last ? string.Empty : ",")}", 1, newLineOnLast:false, skipFirst:false);
+
+            return sb.ToString();
+        }
     }
 
     internal class KnownTypes
@@ -329,7 +337,6 @@ static Lazy<ModelMetadata> {meta.VariableName} = new Lazy<ModelMetadata>(() => {
         public int DataSourceType { get; internal set; }
         
         public List<FMetadata> Fields = new();
-        
         public string VariableName { get; internal set; }
     }
 

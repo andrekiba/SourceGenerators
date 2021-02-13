@@ -65,8 +65,9 @@ namespace AutoNotify
             }
 
             // group the fields by class, and generate the source
-            foreach (IGrouping<INamedTypeSymbol, IFieldSymbol> group in fieldSymbols.GroupBy(f => f.ContainingType))
+            foreach (var grouping in fieldSymbols.GroupBy(f => f.ContainingType, SymbolEqualityComparer.Default))
             {
+                var group = (IGrouping<INamedTypeSymbol, IFieldSymbol>) grouping;
                 var classSource = ProcessClass(group.Key, group.ToList(), attributeSymbol, notifySymbol, context);
                 context.AddSource($"{group.Key.Name}_autoNotify.cs", classSource);
             }
@@ -89,9 +90,8 @@ namespace {namespaceName}
     public partial class {classSymbol.Name} : {notifySymbol.ToDisplayString()}
     {{
 ");
-
             // if the class doesn't implement INotifyPropertyChanged already, add it
-            if (!classSymbol.Interfaces.Contains(notifySymbol))
+            if (!classSymbol.Interfaces.Contains(notifySymbol, SymbolEqualityComparer.Default))
                 source.Append("public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;");
 
             // create properties for each field 

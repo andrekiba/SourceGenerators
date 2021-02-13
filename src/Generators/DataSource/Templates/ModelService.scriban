@@ -32,6 +32,9 @@ namespace DataSource
         {{~ end ~}}
         public static ModelMetadata GetMetadata<T>()
         {
+            {{~ if Metas | array.size == 0 ~}}
+            throw new System.InvalidOperationException("This code is unreachable.");
+            {{~ else ~}}
             {{~ for meta in Metas ~}}
             {{~ if !for.last ~}}
             if (typeof(T) == typeof({{meta.ModelType}}))
@@ -39,6 +42,7 @@ namespace DataSource
                                    
             {{~ else ~}}
             return {{meta.VariableName}}.Value;
+            {{~ end ~}}
             {{~ end ~}}
             {{~ end ~}}
         }

@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Generators.DataSource;
@@ -17,14 +18,14 @@ namespace GeneratorTest
     {
         static async Task Main(string[] args)
         {
-            var source = await File.ReadAllTextAsync(@"../../../../ConsoleApp/Program.cs");
+            const string sourcePath = @"../../../../ConsoleApp/Program.cs";
 
-            //var generator = new HelloWorldGenerator();
+            var generator = new HelloWorldGenerator();
             //var generator = new DIGenerator();
             //var generator = new EnumValidatorGenerator();
-            var generator = new DataSourceGenerator();
+            //var generator = new DataSourceGenerator();
             
-            var (diagnostics, output) = Runner.GetGeneratedOutput(generator, source);
+            var (diagnostics, output) = await Runner.GetGeneratedOutput(generator, sourcePath);
 
             if (diagnostics.Length > 0)
             {
@@ -42,9 +43,12 @@ namespace GeneratorTest
     
     public static class Runner
     {
-        public static (ImmutableArray<Diagnostic>, string) GetGeneratedOutput(ISourceGenerator generator, string source)
+        public static async Task<(ImmutableArray<Diagnostic>, string)> GetGeneratedOutput(ISourceGenerator generator, string sourcePath)
         {
-            var syntaxTree = CSharpSyntaxTree.ParseText(source);
+            var source = await File.ReadAllTextAsync(sourcePath);
+            var syntaxTree = CSharpSyntaxTree
+                .ParseText(source)
+                .WithFilePath(sourcePath);
 
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             var references = (

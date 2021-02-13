@@ -7,7 +7,7 @@ namespace ConsoleApp
         static void Main(string[] args)
         {
             //HelloWorld
-            //HelloWorldGenerated.HelloWorld.SayHello();
+            HelloWorldGenerated.HelloWorld.SayHello();
             
             //DI
             //var foo = DI.ServiceLocator.GetService<IFoo>();
@@ -31,10 +31,10 @@ namespace ConsoleApp
             */
 
             //DataSource
-            var test = new Test();
-            var mTest = ModelService.GetMetadata<Test>();
-            var user = new User();
-            var mUser = ModelService.GetMetadata<User>();
+            //var test = new Test();
+            //var mTest = ModelService.GetMetadata<Test>();
+            //var user = new User();
+            //var mUser = ModelService.GetMetadata<User>();
         }
     }
     
