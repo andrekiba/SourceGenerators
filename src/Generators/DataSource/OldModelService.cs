@@ -44,7 +44,7 @@ namespace Generators.DataSource
     }
     
     [AttributeUsage(AttributeTargets.Class)]
-    sealed class DataSourceAttribute : Attribute
+    internal sealed class DataSourceAttribute : Attribute
     {
         public string Name { get; }
         public DataSourceType ModelType { get; }
@@ -57,7 +57,7 @@ namespace Generators.DataSource
     }
     
     [AttributeUsage(AttributeTargets.Property)]
-    sealed class ColumnAttribute : Attribute
+    internal sealed class ColumnAttribute : Attribute
     {
         public string Name { get; }
         
