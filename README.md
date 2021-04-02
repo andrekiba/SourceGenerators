@@ -2,8 +2,8 @@
 
 Here the code related to the sessions I held at **Rome .NET Conference 2020** and **CodeGen 2021**.  
 
-https://www.youtube.com/watch?v=HDHlcuNdMwc   
-https://www.youtube.com/watch?v=K5a5-JlRthc&list=PL2MtHawKsWOmOcjHBBYjIxdvVuLFas78z&index=30
+https://youtu.be/HDHlcuNdMwc   
+https://youtu.be/K5a5-JlRthc
 
 The most intereseting example is the one about the `DataSource`.  
 We substitute the creation of POCO objects, used to read data from the database with Dapper,  
